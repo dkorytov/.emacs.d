@@ -138,3 +138,8 @@ map))
 (global-set-key (kbd "C->") 'my/zoom-in)
 (global-set-key (kbd "C-<") 'my/zoom-out)
 
+(require 'org)
+(setq org-todo-keywords
+  '((sequence "TODO" "IN-PROGRESS" "WAITING" "DONE")))
+(setq bell-volume 0)
+(setq visible-bell 1)
