@@ -46,6 +46,9 @@ map))
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(org-agenda-files
+   (quote
+    ("~/org/core.org" "~/org/work.org" "~/org/school.org" "~/org/home.org")))
  '(package-selected-packages (quote (flylisp))))
 ;(custom-set-faces
   ;; custom-set-faces was added by Custom.
@@ -140,6 +143,9 @@ map))
 
 (require 'org)
 (setq org-todo-keywords
-  '((sequence "TODO" "IN-PROGRESS" "WAITING" "DONE")))
+      '((sequence "TODO" "IN-PROGRESS" "WAITING" "DONE")))
+(setq org-agenda-files (list "~/org/work.org"
+                             "~/org/school.org" 
+                             "~/org/home.org"))
 (setq bell-volume 0)
 (setq visible-bell 1)
