@@ -11,6 +11,8 @@
    ;; '("melpa" . "http://stable.melpa.org/packages/") ; many packages won't show if using stable
    '("melpa" . "http://melpa.milkbox.net/packages/")
    t))
+(require 'gruvbox)
+(load-theme 'gruvbox-dark-hard t)
 
  (setq column-number-mode t)
 (defun prev-window ()
@@ -35,13 +37,13 @@
 map))
 (add-hook 'prog-mode-hook #'hs-minor-mode)
 
-(setq default-frame-alist
-      (append default-frame-alist
-       '((foreground-color . "#E0DFDB")
- (background-color . "black")
- (cursor-color . "gray")
- )))
-(set-face-foreground 'font-lock-comment-face "red")
+;; (setq default-frame-alist
+;;       (append default-frame-alist
+;;        '((foreground-color . "#E0DFDB")
+;;  (background-color . "black")
+;;  (cursor-color . "gray")
+;;  )))
+;; (set-face-foreground 'font-lock-comment-face "red")
 (setq inhibit-startup-message t)   
 (menu-bar-mode -99)
 (tool-bar-mode -1)
@@ -78,10 +80,10 @@ map))
 (define-generic-mode 
   'param-mode                         ;; name of the mode to create
   '("#")                           ;; comments start with '!!'
-  '("false" "true")                     ;; some keywords
+  '("false" "true", "True", "False");; some keywords
   '(("$" . 'font-lock-operator)     ;; '=' is an operator
     ("{}" . 'font-lock-builtin))     ;; ';' is a a built-in 
-  '("\\.foo$")                      ;; files for which to activate this mode 
+  '("\\.param$")                      ;; files for which to activate this mode 
    nil                              ;; other functions to call
   "A mode for param files"            ;; doc string for this mode
 )
