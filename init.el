@@ -155,10 +155,14 @@ map))
 
 (require 'org)
 (setq org-todo-keywords
-      '((sequence "TODO" "IN-PROGRESS" "WAITING" "DONE")))
+      '((sequence "TODO" "DOING" "|" "DONE" "|" "DFRD")))
+(setq org-todo-keyword-faces
+      `(("DONE" . org-done) ("DOING" . "orange") ("DFRD" . "#696FCD")))
 (setq org-agenda-files (list "~/org/work.org"
                              "~/org/school.org" 
                              "~/org/home.org"))
+(setq org-log-done 'time)
+
 (setq bell-volume 0)
 (setq visible-bell 1)
 ;;; Stefan Monnier <foo at acm.org>. It is the opposite of fill-paragraph    
