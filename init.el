@@ -58,9 +58,7 @@ map))
  '(custom-safe-themes
    (quote
     ("e2fd81495089dc09d14a88f29dfdff7645f213e2c03650ac2dd275de52a513de" "a622aaf6377fe1cd14e4298497b7b2cae2efc9e0ce362dade3a58c16c89e089c" "2a9039b093df61e4517302f40ebaf2d3e95215cb2f9684c8c1a446659ee226b9" default)))
- '(org-agenda-files
-   (quote
-    ("~/org/core.org" "~/org/school.org" "~/org/home.org")))
+ '(org-agenda-files (quote ("~/org/core.org" "~/org/school.org")))
  '(package-selected-packages (quote (gruvbox-theme flylisp))))
 ;(custom-set-faces
   ;; custom-set-faces was added by Custom.
@@ -196,3 +194,5 @@ map))
 ;; Enable flyspell mode by default 
 (add-hook 'text-mode-hook 'flyspell-mode)
 (add-hook 'prog-mode-hook 'flyspell-prog-mode)
+(put 'downcase-region 'disabled nil)
+(setq confirm-kill-emacs 'y-or-n-p)
