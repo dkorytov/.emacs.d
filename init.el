@@ -177,19 +177,19 @@ map))
 
 
 ;; PDF viewer
-(require 'pdf-view)
+;; (require 'pdf-view)
  
-(setq pdf-info-epdfinfo-program "/usr/bin/epdfinfo")
+;; (setq pdf-info-epdfinfo-program "/usr/bin/epdfinfo")
  
-(setq pdf-view-midnight-colors `(,(face-attribute 'default :foreground) .
-                                  ,(face-attribute 'default :background)))
+;; (setq pdf-view-midnight-colors `(,(face-attribute 'default :foreground) .
+;;                                   ,(face-attribute 'default :background)))
  
-(add-to-list 'auto-mode-alist '("\\.pdf\\'" . pdf-view-mode))
+;; (add-to-list 'auto-mode-alist '("\\.pdf\\'" . pdf-view-mode))
  
-(add-hook 'pdf-view-mode-hook (lambda ()
-                                 (pdf-view-midnight-minor-mode)))
+;; (add-hook 'pdf-view-mode-hook (lambda ()
+;;                                  (pdf-view-midnight-minor-mode)))
  
-(provide 'init-pdfview)
+;; (provide 'init-pdfview)
 
 ;; Enable flyspell mode by default 
 (add-hook 'text-mode-hook 'flyspell-mode)
