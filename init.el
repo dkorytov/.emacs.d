@@ -17,11 +17,12 @@
 (setq jedi:complete-on-dot t)
 
 ;; Smartmodeline package
-
+(setq sml/no-confirm-load-theme t) ;; removes "loading a theme can run Lisp code"
 (sml/setup)
 (add-to-list 'sml/replacer-regexp-list '("^~/work/scripts/" ":Scrpt:") t)
 (setq sml/name-width 80)
 (setq sml/mode-width 40)
+
 
 (add-hook 'after-init-hook #'global-flycheck-mode)
 (custom-set-variables
@@ -31,7 +32,7 @@
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
    (quote
-    ("e2fd81495089dc09d14a88f29dfdff7645f213e2c03650ac2dd275de52a513de" "a622aaf6377fe1cd14e4298497b7b2cae2efc9e0ce362dade3a58c16c89e089c" "2a9039b093df61e4517302f40ebaf2d3e95215cb2f9684c8c1a446659ee226b9" default)))
+    ("a27c00821ccfd5a78b01e4f35dc056706dd9ede09a8b90c6955ae6a390eb1c1e" "e2fd81495089dc09d14a88f29dfdff7645f213e2c03650ac2dd275de52a513de" "a622aaf6377fe1cd14e4298497b7b2cae2efc9e0ce362dade3a58c16c89e089c" "2a9039b093df61e4517302f40ebaf2d3e95215cb2f9684c8c1a446659ee226b9" default)))
  '(flycheck-python-flake8-executable "python2")
  '(flycheck-python-pycompile-executable "python2")
  '(flycheck-python-pylint-executable "python2")
