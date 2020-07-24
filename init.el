@@ -3,7 +3,8 @@
 ;; installed packages.  Don't delete this line.  If you don't want it,
 ;; just comment it out by adding a semicolon to the start of the line.
 ;; You may delete these explanatory comments.
-(package-initialize)
+
+
 (when (>= emacs-major-version 24)
   (require 'package)
   (add-to-list
@@ -11,11 +12,41 @@
    ;; '("melpa" . "http://stable.melpa.org/packages/") ; many packages won't show if using stable
    '("melpa" . "http://melpa.milkbox.net/packages/")
    t))
+(package-initialize)
+(add-hook 'python-mode-hook 'jedi:setup)
+(setq jedi:complete-on-dot t)
+
+;; Smartmodeline package
+
+(sml/setup)
+(add-to-list 'sml/replacer-regexp-list '("^~/work/scripts/" ":Scrpt:") t)
+(setq sml/name-width 80)
+(setq sml/mode-width 40)
+
+(add-hook 'after-init-hook #'global-flycheck-mode)
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(custom-safe-themes
+   (quote
+    ("e2fd81495089dc09d14a88f29dfdff7645f213e2c03650ac2dd275de52a513de" "a622aaf6377fe1cd14e4298497b7b2cae2efc9e0ce362dade3a58c16c89e089c" "2a9039b093df61e4517302f40ebaf2d3e95215cb2f9684c8c1a446659ee226b9" default)))
+ '(flycheck-python-flake8-executable "python2")
+ '(flycheck-python-pycompile-executable "python2")
+ '(flycheck-python-pylint-executable "python2")
+ '(org-agenda-files (quote ("~/org/core.org" "~/org/school.org")))
+ '(package-selected-packages
+   (quote
+    (smart-mode-line flycheck jedi gruvbox-theme flylisp))))
+(setq flycheck-check-syntax-automatically '(mode-enabled save))
+
 (require 'gruvbox)
 (load-theme 'gruvbox-dark-hard t)
 
- (setq column-number-mode t)
+(setq column-number-mode t)
 (defun prev-window ()
+  "returns to the previous window."
    (interactive)
    (other-window -1))
 (define-key global-map (kbd "C-x p") 'prev-window)
@@ -44,22 +75,14 @@ map))
 ;;  (cursor-color . "gray")
 ;;  )))
 ;; (set-face-foreground 'font-lock-comment-face "red")
-(setq inhibit-startup-message t)   
+(setq inhibit-startup-message t)
 (menu-bar-mode -99)
 (tool-bar-mode -1)
 (scroll-bar-mode -1)
 (add-to-list 'auto-mode-alist '("\\.m\\'" . octave-mode))
 (set-default 'truncate-lines t)
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(custom-safe-themes
-   (quote
-    ("e2fd81495089dc09d14a88f29dfdff7645f213e2c03650ac2dd275de52a513de" "a622aaf6377fe1cd14e4298497b7b2cae2efc9e0ce362dade3a58c16c89e089c" "2a9039b093df61e4517302f40ebaf2d3e95215cb2f9684c8c1a446659ee226b9" default)))
- '(org-agenda-files (quote ("~/org/core.org" "~/org/school.org")))
- '(package-selected-packages (quote (gruvbox-theme flylisp))))
+(setq-default fill-column 80)
+
 ;(custom-set-faces
   ;; custom-set-faces was added by Custom.
   ;; If you edit it by hand, you could mess it up, so be careful.
@@ -75,13 +98,13 @@ map))
 
 (require 'generic-x) ;; we need this
 
-(define-generic-mode 
+(define-generic-mode
   'param-mode                         ;; name of the mode to create
   '("#")                           ;; comments start with '!!'
   '("false" "true", "True", "False");; some keywords
   '(("$" . 'font-lock-operator)     ;; '=' is an operator
-    ("{}" . 'font-lock-builtin))     ;; ';' is a a built-in 
-  '("\\.param$")                      ;; files for which to activate this mode 
+    ("{}" . 'font-lock-builtin))     ;; ';' is a a built-in
+  '("\\.param$")                      ;; files for which to activate this mode
    nil                              ;; other functions to call
   "A mode for param files"            ;; doc string for this mode
 )
@@ -103,7 +126,7 @@ map))
 (setq backup-directory-alist '(("" . "~/.emacs.d/backup/per-save")))
 
 (defun force-backup-of-buffer ()
-  ;; Make a special "per session" backup at the first save of each
+  "Make a special 'per session' backup at the first save of each."
   ;; emacs session.
   (when (not buffer-backed-up)
     ;; Override the default parameters for per-session backups.
@@ -128,11 +151,11 @@ map))
 ;;only kills/copies text if the area is active
 (setq mark-even-if-inactive nil)
 
-;;start emacs in eshell by default or at the command line 
+;;start emacs in eshell by default or at the command line
 ;;specified file
 ;;(add-hook 'emacs-startup-hook (lambda () (eshell)))
 (defun my/zoom-in ()
-  "Increase font size by 10 points"
+  "Increase font size by 10 points."
   (interactive)
   (set-face-attribute 'default nil
                       :height
@@ -140,7 +163,7 @@ map))
                          15)))
 
 (defun my/zoom-out ()
-  "Decrease font size by 10 points"
+  "Decrease font size by 10 points."
   (interactive)
   (set-face-attribute 'default nil
                       :height
@@ -157,13 +180,13 @@ map))
 (setq org-todo-keyword-faces
       `(("DONE" . org-done) ("DOING" . "orange") ("DFRD" . "#696FCD")))
 (setq org-agenda-files (list "~/org/work.org"
-                             "~/org/school.org" 
+                             "~/org/school.org"
                              "~/org/home.org"))
 (setq org-log-done 'time)
 
 (setq bell-volume 0)
 (setq visible-bell 1)
-;;; Stefan Monnier <foo at acm.org>. It is the opposite of fill-paragraph    
+;;; Stefan Monnier <foo at acm.org>. It is the opposite of fill-paragraph
     (defun unfill-paragraph (&optional region)
       "Takes a multi-line paragraph and makes it into a single line of text."
       (interactive (progn (barf-if-buffer-read-only) '(t)))
@@ -191,8 +214,21 @@ map))
  
 ;; (provide 'init-pdfview)
 
-;; Enable flyspell mode by default 
+;; Enable flyspell mode by default
 (add-hook 'text-mode-hook 'flyspell-mode)
 (add-hook 'prog-mode-hook 'flyspell-prog-mode)
 (put 'downcase-region 'disabled nil)
 (setq confirm-kill-emacs 'y-or-n-p)
+(add-hook 'shell-mode-hook 'ansi-color-for-comint-mode-on)
+(add-to-list 'comint-output-filter-functions 'ansi-color-process-output)
+;; (add-hook 'eshell-preoutput-filter-functions
+;;            'ansi-color-filter-apply)
+(add-hook 'eshell-preoutput-filter-functions
+           'ansi-color-apply)
+
+(setq frame-title-format
+          '("" (:eval
+             (if buffer-file-name
+                 (abbreviate-file-name buffer-file-name)
+               "%b"))))
+
