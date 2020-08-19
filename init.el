@@ -9,17 +9,22 @@
   (require 'package)
   (add-to-list
    'package-archives
-   ;; '("melpa" . "http://stable.melpa.org/packages/") ; many packages won't show if using stable
-   '("melpa" . "http://melpa.milkbox.net/packages/")
+   '("melpa" . "http://stable.melpa.org/packages/") ; many packages won't show if using stable
+   ;; '("melpa" . "http://melpa.milkbox.net/packages/") ; couldn't download sphinx-doc
    t))
 (package-initialize)
 (add-hook 'python-mode-hook 'jedi:setup)
 (setq jedi:complete-on-dot t)
 
+;; Sphinx docs for python
+(add-hook 'python-mode-hook (lambda ()
+			      (require 'sphinx-doc)
+			      (sphinx-doc-mode t)))
 ;; Smartmodeline package
 (setq sml/no-confirm-load-theme t) ;; removes "loading a theme can run Lisp code"
 (sml/setup)
 (add-to-list 'sml/replacer-regexp-list '("^~/work/scripts/" ":Scrpt:") t)
+(add-to-list 'sml/replacer-regexp-list '("^~/work/scripts2/" ":Scrpt2:") t)
 (setq sml/name-width 80)
 (setq sml/mode-width 40)
 
@@ -39,15 +44,17 @@
  '(org-agenda-files (quote ("~/org/core.org" "~/org/school.org")))
  '(package-selected-packages
    (quote
-    (smart-mode-line flycheck jedi gruvbox-theme flylisp))))
+    (sphinx-doc smart-mode-line flycheck jedi gruvbox-theme flylisp))))
+
 (setq flycheck-check-syntax-automatically '(mode-enabled save))
 
+;; Gruvbox theme
 (require 'gruvbox)
 (load-theme 'gruvbox-dark-hard t)
 
 (setq column-number-mode t)
 (defun prev-window ()
-  "returns to the previous window."
+  "Return to the previous window."
    (interactive)
    (other-window -1))
 (define-key global-map (kbd "C-x p") 'prev-window)
@@ -57,6 +64,7 @@
 (define-key global-map (kbd "M-n") 'scroll-up-line)
 (define-key global-map (kbd "M-p") 'scroll-down-line)
 (define-key global-map (kbd "M-:") 'comment-box)
+
 (setq hs-minor-mode-map
       (let ((map (make-sparse-keymap)))
         (define-key map (kbd "C-c @ h")   'hs-hide-block)
@@ -82,7 +90,7 @@ map))
 (scroll-bar-mode -1)
 (add-to-list 'auto-mode-alist '("\\.m\\'" . octave-mode))
 (set-default 'truncate-lines t)
-(setq-default fill-column 80)
+(setq-default fill-column 79)
 
 ;(custom-set-faces
   ;; custom-set-faces was added by Custom.
@@ -187,16 +195,19 @@ map))
 
 (setq bell-volume 0)
 (setq visible-bell 1)
+
+;; set fill-paragraph to interact with fill paragraph correctly
+(setq python-fill-docstring-style 'django)
 ;;; Stefan Monnier <foo at acm.org>. It is the opposite of fill-paragraph
-    (defun unfill-paragraph (&optional region)
-      "Takes a multi-line paragraph and makes it into a single line of text."
-      (interactive (progn (barf-if-buffer-read-only) '(t)))
-      (let ((fill-column (point-max))
-            ;; This would override `fill-column' if it's an integer.
-            (emacs-lisp-docstring-fill-column t))
-        (fill-paragraph nil region)))
-    ;; Handy key definition
-    (define-key global-map "\M-Q" 'unfill-paragraph)
+(defun unfill-paragraph (&optional region)
+  "Takes a multi-line paragraph and makes it into a single line of text."
+  (interactive (progn (barf-if-buffer-read-only) '(t)))
+  (let ((fill-column (point-max))
+	;; This would override `fill-column' if it's an integer.
+	(emacs-lisp-docstring-fill-column t))
+    (fill-paragraph nil region)))
+;; Handy key definition
+(define-key global-map "\M-Q" 'unfill-paragraph)
 
 
 
@@ -233,3 +244,6 @@ map))
                  (abbreviate-file-name buffer-file-name)
                "%b"))))
 
+;; Make 'M-shell' appear in current buffer
+(add-to-list 'display-buffer-alist
+             '("^\\*shell\\*$" . (display-buffer-same-window)))
