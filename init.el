@@ -10,9 +10,23 @@
   (add-to-list
    'package-archives
    '("melpa" . "http://stable.melpa.org/packages/") ; many packages won't show if using stable
-   ;; '("melpa" . "http://melpa.milkbox.net/packages/") ; couldn't download sphinx-doc
+   t)
+  (add-to-list
+   'package-archives
+   '("milkbox" . "http://melpa.milkbox.net/packages/") ; couldn't download sphinx-doc
    t))
 (package-initialize)
+
+(dolist (package '(use-package))
+  (unless (package-installed-p package)
+           (package-install package)))
+
+(use-package flycheck :ensure t)
+(use-package gruvbox-theme :ensure t)
+(use-package jedi :ensure t)
+(use-package smart-mode-line :ensure t)
+(use-package sphinx-doc :ensure t)
+
 (add-hook 'python-mode-hook 'jedi:setup)
 (setq jedi:complete-on-dot t)
 
