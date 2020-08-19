@@ -71,6 +71,16 @@
   "Return to the previous window."
    (interactive)
    (other-window -1))
+
+;; Quickly setup git
+(defun git-config-init ()
+  "Setup git on a clean machine."
+  (interactive)
+  (shell-command "git config --global user.email \"korytov@energyhub.net\"")
+  (shell-command "git config --global user.name \"Dan Korytov\"")
+  (shell-command "git config --global push.default simple")
+  (message "git config is setup!"))
+
 (define-key global-map (kbd "C-x p") 'prev-window)
 (define-key global-map (kbd "<f11>") 'toggle-full-screen)
 (define-key global-map (kbd "M-<down>") 'scroll-up-line)
@@ -257,6 +267,7 @@ map))
              (if buffer-file-name
                  (abbreviate-file-name buffer-file-name)
                "%b"))))
+
 
 ;; Make 'M-shell' appear in current buffer
 (add-to-list 'display-buffer-alist
