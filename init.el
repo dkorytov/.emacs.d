@@ -17,10 +17,12 @@
    t))
 (package-initialize)
 
-(dolist (package '(use-package))
-  (unless (package-installed-p package)
-           (package-install package)))
+(unless (package-installed-p 'use-package)
+  (package-refresh-contents)
+  (package-install 'use-package))
 
+(eval-when-compile
+  (require 'use-package))
 (use-package flycheck :ensure t)
 (use-package gruvbox-theme :ensure t)
 (use-package jedi :ensure t)
