@@ -81,6 +81,8 @@
   (shell-command "git config --global user.email \"korytov@energyhub.net\"")
   (shell-command "git config --global user.name \"Dan Korytov\"")
   (shell-command "git config --global push.default simple")
+  (shell-command "git config --global core.editor emacs")
+  (shell-command "git config --global core.pager 'cat'")
   (message "git config is setup!"))
 
 (define-key global-map (kbd "C-x p") 'prev-window)
