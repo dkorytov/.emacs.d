@@ -60,7 +60,7 @@
  '(org-agenda-files (quote ("~/org/core.org" "~/org/school.org")))
  '(package-selected-packages
    (quote
-    (sphinx-doc smart-mode-line flycheck jedi gruvbox-theme flylisp))))
+    (use-package sphinx-doc smart-mode-line flycheck jedi gruvbox-theme flylisp))))
 
 (setq flycheck-check-syntax-automatically '(mode-enabled save))
 
@@ -83,6 +83,7 @@
   (shell-command "git config --global push.default simple")
   (shell-command "git config --global core.editor emacs")
   (shell-command "git config --global core.pager 'cat'")
+  (shell-command "git config --global alias.ll 'log --oneline --graph -n'")
   (message "git config is setup!"))
 
 (define-key global-map (kbd "C-x p") 'prev-window)
