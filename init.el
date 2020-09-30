@@ -25,6 +25,7 @@
   (require 'use-package))
 (use-package flycheck :ensure t)
 (use-package gruvbox-theme :ensure t)
+(use-package xterm-color :ensure t)
 (use-package jedi :ensure t)
 (use-package smart-mode-line :ensure t)
 (use-package sphinx-doc :ensure t)
