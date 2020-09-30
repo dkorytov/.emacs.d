@@ -60,13 +60,19 @@
  '(org-agenda-files (quote ("~/org/core.org" "~/org/school.org")))
  '(package-selected-packages
    (quote
-    (use-package sphinx-doc smart-mode-line flycheck jedi gruvbox-theme flylisp))))
+    (xterm-color use-package sphinx-doc smart-mode-line flycheck jedi gruvbox-theme flylisp))))
 
 (setq flycheck-check-syntax-automatically '(mode-enabled save))
 
 ;; Gruvbox theme
 (require 'gruvbox)
 (load-theme 'gruvbox-dark-hard t)
+
+;; eshell colors to display properly
+(add-hook 'eshell-mode-hook
+          (lambda ()
+            (setenv "TERM" "xterm-256color")))
+(add-hook 'eshell-before-prompt-hook (setq xterm-color-preserve-properties t))
 
 (setq column-number-mode t)
 (defun prev-window ()
