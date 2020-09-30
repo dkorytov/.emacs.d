@@ -111,7 +111,12 @@
         (define-key map [(shift mouse-2)] 'hs-mouse-toggle-hiding)
 map))
 (add-hook 'prog-mode-hook #'hs-minor-mode)
-
+(defadvice goto-line (after expand-after-goto-line
+			    activate compile)
+  "hideshow-expand affected block when using goto-line in a
+collapsed buffer"
+  (save-excursion
+    (hs-show-block)))
 ;; (setq default-frame-alist
 ;;       (append default-frame-alist
 ;;        '((foreground-color . "#E0DFDB")
