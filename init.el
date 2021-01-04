@@ -90,7 +90,7 @@
   (shell-command "git config --global push.default simple")
   (shell-command "git config --global core.editor emacs")
   (shell-command "git config --global core.pager 'cat'")
-  (shell-command "git config --global alias.ll 'log --oneline --graph -n'")
+  (shell-command "git config --global alias.ll 'log --oneline --graph --decorate -n'")
   (message "git config is setup!"))
 
 (define-key global-map (kbd "C-x p") 'prev-window)
