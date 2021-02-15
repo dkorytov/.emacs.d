@@ -40,8 +40,9 @@
 ;; Smartmodeline package
 (setq sml/no-confirm-load-theme t) ;; removes "loading a theme can run Lisp code"
 (sml/setup)
-(add-to-list 'sml/replacer-regexp-list '("^~/work/scripts/" ":Scrpt:") t)
-(add-to-list 'sml/replacer-regexp-list '("^~/work/scripts2/" ":Scrpt2:") t)
+(add-to-list 'sml/replacer-regexp-list '("^~/work/scripts/" ":scripts:") t)
+(add-to-list 'sml/replacer-regexp-list '("^~/work/scripts2/" ":scripts2:") t)
+(add-to-list 'sml/replacer-regexp-list '("^~/work/analytics/" ":analytics:") t)
 (setq sml/name-width 80)
 (setq sml/mode-width 40)
 
@@ -55,9 +56,10 @@
  '(custom-safe-themes
    (quote
     ("a27c00821ccfd5a78b01e4f35dc056706dd9ede09a8b90c6955ae6a390eb1c1e" "e2fd81495089dc09d14a88f29dfdff7645f213e2c03650ac2dd275de52a513de" "a622aaf6377fe1cd14e4298497b7b2cae2efc9e0ce362dade3a58c16c89e089c" "2a9039b093df61e4517302f40ebaf2d3e95215cb2f9684c8c1a446659ee226b9" default)))
- '(flycheck-python-flake8-executable "python2")
- '(flycheck-python-pycompile-executable "python2")
- '(flycheck-python-pylint-executable "python2")
+ '(flycheck-python-flake8-executable "python")
+ '(flycheck-python-pycompile-executable "python")
+ '(flycheck-python-pylint-executable "python")
+ '(flycheck-python-mypy-executable "python")
  '(org-agenda-files (quote ("~/org/core.org" "~/org/school.org")))
  '(package-selected-packages
    (quote
@@ -92,6 +94,11 @@
   (shell-command "git config --global core.pager 'cat'")
   (shell-command "git config --global alias.ll 'log --oneline --graph --decorate -n'")
   (message "git config is setup!"))
+
+(defun flycheck-pip-install()
+  "Quickly installs pip packages for flycheck"
+  (interactive)
+  (shell-command "pip install -r ~/.emacs.d/requirements.txt"))
 
 (define-key global-map (kbd "C-x p") 'prev-window)
 (define-key global-map (kbd "<f11>") 'toggle-full-screen)
