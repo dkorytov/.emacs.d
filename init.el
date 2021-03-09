@@ -29,9 +29,16 @@
 (use-package jedi :ensure t)
 (use-package smart-mode-line :ensure t)
 (use-package sphinx-doc :ensure t)
-
+(use-package elpy :ensure t)
+(use-package projectile :ensure t)
 (add-hook 'python-mode-hook 'jedi:setup)
 (setq jedi:complete-on-dot t)
+
+(elpy-enable)
+
+(load "~/.emacs.d/blacken")
+(setq blacken-line-length 120)
+(add-hook 'python-mode-hook 'blacken-mode)
 
 ;; Sphinx docs for python
 (add-hook 'python-mode-hook (lambda ()
@@ -57,16 +64,27 @@
  '(custom-safe-themes
    (quote
     ("a27c00821ccfd5a78b01e4f35dc056706dd9ede09a8b90c6955ae6a390eb1c1e" "e2fd81495089dc09d14a88f29dfdff7645f213e2c03650ac2dd275de52a513de" "a622aaf6377fe1cd14e4298497b7b2cae2efc9e0ce362dade3a58c16c89e089c" "2a9039b093df61e4517302f40ebaf2d3e95215cb2f9684c8c1a446659ee226b9" default)))
- '(flycheck-python-flake8-executable "python")
- '(flycheck-python-mypy-executable "python")
+ '(flycheck-python-flake8-executable "flake8")
+ '(flycheck-python-mypy-executable "mypy")
  '(flycheck-python-pycompile-executable "python")
  '(org-agenda-files (quote ("~/org/core.org" "~/org/school.org")))
  '(package-selected-packages
    (quote
-    (exec-path-from-shell xterm-color use-package sphinx-doc smart-mode-line flycheck jedi gruvbox-theme flylisp))))
+    (markdown-mode flycheck-projectile magit elpy projectile exec-path-from-shell xterm-color use-package sphinx-doc smart-mode-line flycheck jedi gruvbox-theme flylisp))))
 
 (setq flycheck-check-syntax-automatically '(mode-enabled save))
 (setq-default flycheck-disabled-checkers '(python-pylint)) ;; prevent pylint checker from running
+(add-to-list 'flycheck-python-mypy-config '".mypy.ini")
+
+(defun setup-flycheck-python-project-path ()
+  (interactive)
+  (let ((root (ignore-errors (projectile-project-root))))
+    (when root
+      (add-to-list
+       (make-variable-buffer-local 'flycheck-python-import-path)
+       root))))
+
+(add-hook 'python-mode-hook 'setup-flycheck-python-project-path)
 
 ;; Gruvbox theme
 (require 'gruvbox)
@@ -140,7 +158,7 @@ collapsed buffer"
 (scroll-bar-mode -1)
 (add-to-list 'auto-mode-alist '("\\.m\\'" . octave-mode))
 (set-default 'truncate-lines t)
-(setq-default fill-column 79)
+(setq-default fill-column 120)
 
 ;(custom-set-faces
   ;; custom-set-faces was added by Custom.
@@ -306,3 +324,12 @@ collapsed buffer"
     (insert "# TODO Dan K [")
     (insert (format-time-string "%Y-%m-%d"))
     (insert "]: "))
+
+
+;; set completion list sorting to be up/down instead left/right.
+(setq completions-format `vertical)
+
+;; set a line length limit for grep when it hits large files
+(grep-compute-defaults)
+(grep-apply-setting 'grep-find-template
+  (concat grep-find-template " | cut -c 1-2000"))
