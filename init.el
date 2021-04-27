@@ -111,7 +111,8 @@
   (shell-command "git config --global push.default simple")
   (shell-command "git config --global core.editor emacs")
   (shell-command "git config --global core.pager 'cat'")
-  (shell-command "git config --global alias.ll 'log --oneline --graph --decorate -n'")
+  (shell-command "git config --global alias.ll '!git log --pretty=format:'%C(auto)%h%d (%cr) %s' --graph --decorate -n'")
+  (shell-command "git config --global alias.sl '!git status && git ll 10 && echo ""'")
   ;; (shell-command "git config --global alias.bl '!git reflog show --pretty=format:'%gs ~ %gd' --date=relative | grep 'checkout:' | grep -oE '[^ ]+ ~ .*' | awk -F~ '!seen[$1]++' | head -n 10 | sed 's/~ HEAD@{/(/' | sed 's/}/)/''")
   (message "git config is setup!"))
 
