@@ -325,6 +325,10 @@ collapsed buffer"
     (insert (format-time-string "%Y-%m-%d"))
     (insert "]: "))
 
+(defun rb ()
+  "Rerverts buffer."
+  (interactive)
+  (revert-buffer))
 
 ;; set completion list sorting to be up/down instead left/right.
 (setq completions-format `vertical)
