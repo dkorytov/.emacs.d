@@ -338,3 +338,24 @@ collapsed buffer"
 (grep-compute-defaults)
 (grep-apply-setting 'grep-find-template
   (concat grep-find-template " | cut -c 1-2000"))
+
+;; Add git branch to eshell prompt
+;; ref: https://superuser.com/questions/890937/how-to-show-git-branch-in-emacs-shell
+(defun git-prompt-branch-name ()
+    "Get current git branch name"
+    (let ((args '("symbolic-ref" "HEAD" "--short")))
+      (with-temp-buffer
+        (apply #'process-file "git" nil (list t nil) nil args)
+        (unless (bobp)
+          (goto-char (point-min))
+          (buffer-substring-no-properties (point) (line-end-position))))))
+
+(defun dkorytov:eshell-prompt ()
+  (let ((branch-name (git-prompt-branch-name)))
+    (concat
+     (abbreviate-file-name (eshell/pwd))
+     (if branch-name (format " [%s] $ " branch-name) "$ ")
+     )))
+
+(setq eshell-prompt-function #'dkorytov:eshell-prompt
+      eshell-prompt-regexp ".*$+ ")
