@@ -31,6 +31,7 @@
 (use-package sphinx-doc :ensure t)
 (use-package elpy :ensure t)
 (use-package projectile :ensure t)
+(use-package helm :ensure t)
 (add-hook 'python-mode-hook 'jedi:setup)
 (setq jedi:complete-on-dot t)
 
@@ -70,7 +71,7 @@
  '(org-agenda-files (quote ("~/org/core.org" "~/org/school.org")))
  '(package-selected-packages
    (quote
-    (markdown-mode flycheck-projectile magit elpy projectile exec-path-from-shell xterm-color use-package sphinx-doc smart-mode-line flycheck jedi gruvbox-theme flylisp))))
+    (helm markdown-mode flycheck-projectile magit elpy projectile exec-path-from-shell xterm-color use-package sphinx-doc smart-mode-line flycheck jedi gruvbox-theme flylisp))))
 
 (setq flycheck-check-syntax-automatically '(mode-enabled save))
 (setq-default flycheck-disabled-checkers '(python-pylint)) ;; prevent pylint checker from running
@@ -354,9 +355,12 @@ collapsed buffer"
   "Prompt for eshell with git branch."
   (let ((branch-name (git-prompt-branch-name)))
     (concat
-     (abbreviate-file-name (eshell/pwd))
-     (if branch-name (format " [%s] $ " branch-name) " $ ")
+     (if branch-name (format "\n[%s]\n" branch-name) "\n")
+     (abbreviate-file-name (eshell/pwd)) " $ "
      )))
 
 (setq eshell-prompt-function #'dkorytov:eshell-prompt
       eshell-prompt-regexp ".*$+ ")
+
+;; remove gui pop up windows
+(setq use-dialog-box nil) 
