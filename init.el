@@ -141,6 +141,7 @@
         (define-key map [(shift mouse-2)] 'hs-mouse-toggle-hiding)
 map))
 (add-hook 'prog-mode-hook #'hs-minor-mode)
+(add-hook 'prog-mode-hook #'linum-mode)
 (defadvice goto-line (after expand-after-goto-line
 			    activate compile)
   "hideshow-expand affected block when using goto-line in a
@@ -332,6 +333,11 @@ collapsed buffer"
   (interactive)
   (revert-buffer))
 
+(defun rby ()
+  "Rerverts buffer with auto yes."
+  (interactive)
+  (revert-buffer nil `true))
+
 ;; set completion list sorting to be up/down instead left/right.
 (setq completions-format `vertical)
 
@@ -363,4 +369,6 @@ collapsed buffer"
       eshell-prompt-regexp ".*$+ ")
 
 ;; remove gui pop up windows
-(setq use-dialog-box nil) 
+(setq use-dialog-box nil)
+
+(provide `init)
