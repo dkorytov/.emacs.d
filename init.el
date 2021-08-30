@@ -32,14 +32,19 @@
 (use-package elpy :ensure t)
 (use-package projectile :ensure t)
 (use-package helm :ensure t)
+(use-package python-black
+  :demand t
+  :after python
+  :hook (python-mode . python-black-on-save-mode-enable-dwim))
 (add-hook 'python-mode-hook 'jedi:setup)
 (setq jedi:complete-on-dot t)
 
 (elpy-enable)
 
-(load "~/.emacs.d/blacken")
-(setq blacken-line-length 120)
-(add-hook 'python-mode-hook 'blacken-mode)
+;; Hook for blacken
+(add-hook 'python-mode-hook 'python-black-on-save-mode)
+;; (setq python-black-extra-args)
+;; (setq python-black--config-file ".black.toml")
 
 ;; Sphinx docs for python
 (add-hook 'python-mode-hook (lambda ()
@@ -71,7 +76,7 @@
  '(org-agenda-files (quote ("~/org/core.org" "~/org/school.org")))
  '(package-selected-packages
    (quote
-    (helm markdown-mode flycheck-projectile magit elpy projectile exec-path-from-shell xterm-color use-package sphinx-doc smart-mode-line flycheck jedi gruvbox-theme flylisp))))
+    (python-black helm markdown-mode flycheck-projectile magit elpy projectile exec-path-from-shell xterm-color use-package sphinx-doc smart-mode-line flycheck jedi gruvbox-theme flylisp))))
 
 (setq flycheck-check-syntax-automatically '(mode-enabled save))
 (setq-default flycheck-disabled-checkers '(python-pylint)) ;; prevent pylint checker from running
@@ -372,3 +377,4 @@ collapsed buffer"
 (setq use-dialog-box nil)
 
 (provide `init)
+(put 'upcase-region 'disabled nil)
