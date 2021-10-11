@@ -333,6 +333,13 @@ collapsed buffer"
     (insert (format-time-string "%Y-%m-%d"))
     (insert "]: "))
 
+(defun nt ()
+    "Writes out a todo line with the current date."
+    (interactive)
+    (insert "# Note Dan K [")
+    (insert (format-time-string "%Y-%m-%d"))
+    (insert "]: "))
+
 (defun rb ()
   "Rerverts buffer."
   (interactive)
