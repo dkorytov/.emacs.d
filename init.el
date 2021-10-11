@@ -340,6 +340,16 @@ collapsed buffer"
     (insert (format-time-string "%Y-%m-%d"))
     (insert "]: "))
 
+(defun light-mode()
+  "Set gruv box theme to light mode."
+  (interactive)
+  (load-theme 'gruvbox-light-hard t))
+
+(defun dark-mode()
+  "Set gruv box theme to dark mode."
+  (interactive)
+  (load-theme 'gruvbox-dark-hard t))
+
 (defun rb ()
   "Rerverts buffer."
   (interactive)
