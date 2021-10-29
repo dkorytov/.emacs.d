@@ -4,7 +4,6 @@
 ;; just comment it out by adding a semicolon to the start of the line.
 ;; You may delete these explanatory comments.
 
-
 (when (>= emacs-major-version 24)
   (require 'package)
   (add-to-list
@@ -123,11 +122,12 @@
   (shell-command "git config --global core.pager 'cat'")
   (shell-command "git config --global alias.ll '!git log --pretty=format:'%C(auto)%h%d (%cr) %s' --graph --decorate -n'")
   (shell-command "git config --global alias.sl '!git status && git ll 10 && echo ""'")
+  (shell-command "git config --global alias.ds '!git diff --staged'")
   ;; (shell-command "git config --global alias.bl '!git reflog show --pretty=format:'%gs ~ %gd' --date=relative | grep 'checkout:' | grep -oE '[^ ]+ ~ .*' | awk -F~ '!seen[$1]++' | head -n 10 | sed 's/~ HEAD@{/(/' | sed 's/}/)/''")
   (message "git config is setup!"))
 
 (defun flycheck-pip-install()
-  "Quickly installs pip packages for flycheck"
+  "Quickly installs pip packages for flycheck."
   (interactive)
   (shell-command "pip install -r ~/.emacs.d/requirements.txt"))
 
