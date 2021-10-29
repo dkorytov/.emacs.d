@@ -4,7 +4,6 @@
 ;; just comment it out by adding a semicolon to the start of the line.
 ;; You may delete these explanatory comments.
 
-
 (when (>= emacs-major-version 24)
   (require 'package)
   (add-to-list
@@ -29,9 +28,23 @@
 (use-package jedi :ensure t)
 (use-package smart-mode-line :ensure t)
 (use-package sphinx-doc :ensure t)
-
+(use-package elpy :ensure t)
+(use-package projectile :ensure t)
+(use-package helm :ensure t)
+(use-package diff-hl :ensure t)
+(use-package python-black
+  :demand t
+  :after python
+  :hook (python-mode . python-black-on-save-mode-enable-dwim))
 (add-hook 'python-mode-hook 'jedi:setup)
 (setq jedi:complete-on-dot t)
+
+(elpy-enable)
+
+;; Hook for blacken
+(add-hook 'python-mode-hook 'python-black-on-save-mode)
+;; (setq python-black-extra-args)
+;; (setq python-black--config-file ".black.toml")
 
 ;; Sphinx docs for python
 (add-hook 'python-mode-hook (lambda ()
@@ -57,16 +70,27 @@
  '(custom-safe-themes
    (quote
     ("a27c00821ccfd5a78b01e4f35dc056706dd9ede09a8b90c6955ae6a390eb1c1e" "e2fd81495089dc09d14a88f29dfdff7645f213e2c03650ac2dd275de52a513de" "a622aaf6377fe1cd14e4298497b7b2cae2efc9e0ce362dade3a58c16c89e089c" "2a9039b093df61e4517302f40ebaf2d3e95215cb2f9684c8c1a446659ee226b9" default)))
- '(flycheck-python-flake8-executable "python")
- '(flycheck-python-mypy-executable "python")
+ '(flycheck-python-flake8-executable "flake8")
+ '(flycheck-python-mypy-executable "mypy")
  '(flycheck-python-pycompile-executable "python")
  '(org-agenda-files (quote ("~/org/core.org" "~/org/school.org")))
  '(package-selected-packages
    (quote
-    (exec-path-from-shell xterm-color use-package sphinx-doc smart-mode-line flycheck jedi gruvbox-theme flylisp))))
+    (diff-hl python-black helm markdown-mode flycheck-projectile magit elpy projectile exec-path-from-shell xterm-color use-package sphinx-doc smart-mode-line flycheck jedi gruvbox-theme flylisp))))
 
 (setq flycheck-check-syntax-automatically '(mode-enabled save))
 (setq-default flycheck-disabled-checkers '(python-pylint)) ;; prevent pylint checker from running
+(add-to-list 'flycheck-python-mypy-config '".mypy.ini")
+
+(defun setup-flycheck-python-project-path ()
+  (interactive)
+  (let ((root (ignore-errors (projectile-project-root))))
+    (when root
+      (add-to-list
+       (make-variable-buffer-local 'flycheck-python-import-path)
+       root))))
+
+(add-hook 'python-mode-hook 'setup-flycheck-python-project-path)
 
 ;; Gruvbox theme
 (require 'gruvbox)
@@ -77,6 +101,9 @@
           (lambda ()
             (setenv "TERM" "xterm-256color")))
 (add-hook 'eshell-before-prompt-hook (setq xterm-color-preserve-properties t))
+
+;; diff-hl all buffers
+(global-diff-hl-mode)
 
 (setq column-number-mode t)
 (defun prev-window ()
@@ -93,12 +120,14 @@
   (shell-command "git config --global push.default simple")
   (shell-command "git config --global core.editor emacs")
   (shell-command "git config --global core.pager 'cat'")
-  (shell-command "git config --global alias.ll 'log --oneline --graph --decorate -n'")
+  (shell-command "git config --global alias.ll '!git log --pretty=format:'%C(auto)%h%d (%cr) %s' --graph --decorate -n'")
+  (shell-command "git config --global alias.sl '!git status && git ll 10 && echo ""'")
+  (shell-command "git config --global alias.ds '!git diff --staged'")
   ;; (shell-command "git config --global alias.bl '!git reflog show --pretty=format:'%gs ~ %gd' --date=relative | grep 'checkout:' | grep -oE '[^ ]+ ~ .*' | awk -F~ '!seen[$1]++' | head -n 10 | sed 's/~ HEAD@{/(/' | sed 's/}/)/''")
   (message "git config is setup!"))
 
 (defun flycheck-pip-install()
-  "Quickly installs pip packages for flycheck"
+  "Quickly installs pip packages for flycheck."
   (interactive)
   (shell-command "pip install -r ~/.emacs.d/requirements.txt"))
 
@@ -121,6 +150,7 @@
         (define-key map [(shift mouse-2)] 'hs-mouse-toggle-hiding)
 map))
 (add-hook 'prog-mode-hook #'hs-minor-mode)
+(add-hook 'prog-mode-hook #'linum-mode)
 (defadvice goto-line (after expand-after-goto-line
 			    activate compile)
   "hideshow-expand affected block when using goto-line in a
@@ -140,7 +170,7 @@ collapsed buffer"
 (scroll-bar-mode -1)
 (add-to-list 'auto-mode-alist '("\\.m\\'" . octave-mode))
 (set-default 'truncate-lines t)
-(setq-default fill-column 79)
+(setq-default fill-column 120)
 
 ;(custom-set-faces
   ;; custom-set-faces was added by Custom.
@@ -306,3 +336,66 @@ collapsed buffer"
     (insert "# TODO Dan K [")
     (insert (format-time-string "%Y-%m-%d"))
     (insert "]: "))
+
+(defun nt ()
+    "Writes out a todo line with the current date."
+    (interactive)
+    (insert "# Note Dan K [")
+    (insert (format-time-string "%Y-%m-%d"))
+    (insert "]: "))
+
+(defun light-mode()
+  "Set gruv box theme to light mode."
+  (interactive)
+  (load-theme 'gruvbox-light-hard t))
+
+(defun dark-mode()
+  "Set gruv box theme to dark mode."
+  (interactive)
+  (load-theme 'gruvbox-dark-hard t))
+
+(defun rb ()
+  "Rerverts buffer."
+  (interactive)
+  (revert-buffer))
+
+(defun rby ()
+  "Rerverts buffer with auto yes."
+  (interactive)
+  (revert-buffer nil `true))
+
+;; set completion list sorting to be up/down instead left/right.
+(setq completions-format `vertical)
+
+;; set a line length limit for grep when it hits large files
+(grep-compute-defaults)
+(grep-apply-setting 'grep-find-template
+  (concat grep-find-template " | cut -c 1-2000"))
+
+;; Add git branch to eshell prompt
+;; ref: https://superuser.com/questions/890937/how-to-show-git-branch-in-emacs-shell
+(defun git-prompt-branch-name ()
+    "Get current git branch name."
+    (let ((args '("symbolic-ref" "HEAD" "--short")))
+      (with-temp-buffer
+        (apply #'process-file "git" nil (list t nil) nil args)
+        (unless (bobp)
+          (goto-char (point-min))
+          (buffer-substring-no-properties (point) (line-end-position))))))
+
+(defun dkorytov:eshell-prompt ()
+  "Prompt for eshell with git branch."
+  (let ((branch-name (git-prompt-branch-name)))
+    (concat
+     (if branch-name (format "\n[%s]\n" branch-name) "\n")
+     (abbreviate-file-name (eshell/pwd)) " $ "
+     )))
+
+(setq eshell-prompt-function #'dkorytov:eshell-prompt
+      eshell-prompt-regexp ".*$+ ")
+
+;; remove gui pop up windows
+(setq use-dialog-box nil)
+
+(provide `init)
+(put 'upcase-region 'disabled nil)
