@@ -5,16 +5,12 @@
 ;; just comment it out by adding a semicolon to the start of the line.
 ;; You may delete these explanatory comments.
 
-;; (when (>= emacs-major-version 24)
-;;   (require 'package)
-;;   (add-to-list
-;;    'package-archives
-;;    '("melpa" . "http://stable.melpa.org/packages/") ; many packages won't show if using stable
-;;    t)
-;;   (add-to-list
-;;    'package-archives
-;;    '("milkbox" . "http://melpa.milkbox.net/packages/") ; couldn't download sphinx-doc
-;;    t))
+(when (>= emacs-major-version 24)
+  (require 'package)
+ (add-to-list
+  'package-archives
+  '("apple ELPA" . "https://github.pie.apple.com/emacs/apple-elpa")
+  t))
 ;; (package-initialize)
 
 ;; (unless (package-installed-p 'use-package)
