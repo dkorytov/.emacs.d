@@ -1,0 +1,10 @@
+pyspark
+matplotlib
+numpy
+scipy
+matplotlib
+sklearn
+black
+mypy
+jedi
+virtualenv

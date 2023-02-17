@@ -5,40 +5,46 @@
 ;; just comment it out by adding a semicolon to the start of the line.
 ;; You may delete these explanatory comments.
 
+;; (when (>= emacs-major-version 24)
+;;   (require 'package)
+ ;; (add-to-list
+ ;;  'package-archives
+ ;;  '("apple ELPA" . "https://github.pie.apple.com/emacs/apple-elpa")
+ ;;  t)
 (when (>= emacs-major-version 24)
   (require 'package)
- (add-to-list
-  'package-archives
-  '("apple ELPA" . "https://github.pie.apple.com/emacs/apple-elpa")
-  t))
+
+  (add-to-list
+   'package-archives
+   '("melpa" . "http://stable.melpa.org/packages/") ; many packages won't show if using stable
+   t))
 ;; (package-initialize)
 
 ;; (unless (package-installed-p 'use-package)
 ;;   (package-refresh-contents)
 ;;   (package-install 'use-package))
 
-;; (eval-when-compile
-;;   (require 'use-package))
-;; (use-package flycheck :ensure t)
-;; (use-package gruvbox-theme :ensure t)
-;; (use-package xterm-color :ensure t)
-;; (use-package jedi :ensure t)
-;; (use-package smart-mode-line :ensure t)
-;; (use-package sphinx-doc :ensure t)
-;; (use-package elpy :ensure t)
-;; (use-package projectile :ensure t)
-;; (use-package helm :ensure t)
-;; (use-package diff-hl :ensure t)
-;; (use-package python-black
-;;   :demand t
-;;   :after python
-;;   :hook (python-mode . python-black-on-save-mode-enable-dwim))
-;; (add-hook 'python-mode-hook 'jedi:setup)
-;; (setq jedi:complete-on-dot t)
+(eval-when-compile
+  (require 'use-package))
+(use-package flycheck :ensure t)
+(use-package gruvbox-theme :ensure t)
+(use-package xterm-color :ensure t)
+(use-package jedi :ensure t)
+(use-package smart-mode-line :ensure t)
+(use-package sphinx-doc :ensure t)
+(use-package elpy :ensure t)
+(use-package projectile :ensure t)
+(use-package helm :ensure t)
+(use-package diff-hl :ensure t)
+(use-package blacken :ensure t)
 
-;; (elpy-enable)
+(add-hook 'python-mode-hook 'jedi:setup)
+(setq jedi:complete-on-dot t)
 
-;; Hook for blacken
+(elpy-enable)
+(add-hook 'python-mode-hook 'blacken-mode)
+
+;; ;; Hook for blacken
 ;; (add-hook 'python-mode-hook 'python-black-on-save-mode)
 ;; (setq python-black-extra-args)
 ;; (setq python-black--config-file ".black.toml")
@@ -48,8 +54,8 @@
 ;; 			            (require 'sphinx-doc)
 				          ;; (sphinx-doc-mode t)))
 ;; Smartmodeline package
-;; (setq sml/no-confirm-load-theme t) ;; removes "loading a theme can run Lisp code"
-;; (sml/setup)
+(setq sml/no-confirm-load-theme t) ;; removes "loading a theme can run Lisp code"
+(sml/setup)
 ;; (add-to-list 'sml/replacer-regexp-list '("^~/work/scripts/" ":scripts:") t)
 ;; (add-to-list 'sml/replacer-regexp-list '("^~/work/scripts2/" ":scripts2:") t)
 ;; (add-to-list 'sml/replacer-regexp-list '("^~/work/analytics/" ":analytics:") t)
@@ -65,7 +71,8 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
-   '("a27c00821ccfd5a78b01e4f35dc056706dd9ede09a8b90c6955ae6a390eb1c1e" "e2fd81495089dc09d14a88f29dfdff7645f213e2c03650ac2dd275de52a513de" "a622aaf6377fe1cd14e4298497b7b2cae2efc9e0ce362dade3a58c16c89e089c" "2a9039b093df61e4517302f40ebaf2d3e95215cb2f9684c8c1a446659ee226b9" default)))
+   '("a27c00821ccfd5a78b01e4f35dc056706dd9ede09a8b90c6955ae6a390eb1c1e" "e2fd81495089dc09d14a88f29dfdff7645f213e2c03650ac2dd275de52a513de" "a622aaf6377fe1cd14e4298497b7b2cae2efc9e0ce362dade3a58c16c89e089c" "2a9039b093df61e4517302f40ebaf2d3e95215cb2f9684c8c1a446659ee226b9" default))
+ '(package-selected-packages '(org-bullets blacken use-package gruvbox-theme)))
  ;; '(flycheck-python-flake8-executable "flake8")
  ;; '(flycheck-python-mypy-executable "mypy")
  ;; '(flycheck-python-pycompile-executable "python")
@@ -88,17 +95,17 @@
 (add-hook 'python-mode-hook 'setup-flycheck-python-project-path)
 
 ;; Gruvbox theme
-;; (require 'gruvbox)
-;; (load-theme 'gruvbox-dark-hard t)
+(require 'gruvbox)
+(load-theme 'gruvbox-dark-hard t)
 
 ;; eshell colors to display properly
-;; (add-hook 'eshell-mode-hook
-;;           (lambda ()
-;;             (setenv "TERM" "xterm-256color")))
-;; (add-hook 'eshell-before-prompt-hook (setq xterm-color-preserve-properties t))
+(add-hook 'eshell-mode-hook
+          (lambda ()
+            (setenv "TERM" "xterm-256color")))
+(add-hook 'eshell-before-prompt-hook (setq xterm-color-preserve-properties t))
 
 ;; diff-hl all buffers
-;; (global-diff-hl-mode)
+(global-diff-hl-mode)
 
 (setq column-number-mode t)
 (defun prev-window ()
@@ -376,3 +383,5 @@ collapsed buffer"
 
 (provide `init)
 (put 'upcase-region 'disabled nil)
+
+ (tool-bar-mode -1)

@@ -4,6 +4,8 @@ git config --global push.default "simple"
 git config --global core.editor "emacs"
 git config --global core.pager "cat"
 git config --global alias.ll "!git log --pretty=format:'%C(auto)%h%d (%cr) %s' --graph --decorate -n"
+git config --global alias.lll "!git log --pretty=format:'%C(auto)%h%d (%cr) [%an %ae] %s' --graph --decorate -n"
+git config --global alias.llll "!git log --pretty=format:'%C(auto)%h%d (%cr) [%an %ae] %s' --graph --decorate -n"
 git config --global alias.sl "!git status && git ll 10 && echo \"\""
 git config --global alias.ds "!git diff --staged"
 git config --global init.defaultBranch main

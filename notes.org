@@ -1,0 +1,5 @@
+* settings
+  - alt-meta for keyboard (terminal -> profile -> keyboard -> opt to meta)
+  - auto exit terminal (terminal -> profile -> shell -> close on exit)
+  - faster repeat keyboard (system pref -> keyboard)
+  - open new applications in current workspace, not rearranging workspaces (system pref -> mission control -> two radio)
