@@ -1,0 +1,1 @@
+alias pygrep grep $1 -irIe $2 --include="*.py"
