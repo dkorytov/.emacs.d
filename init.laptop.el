@@ -18,31 +18,43 @@
    'package-archives
    '("melpa" . "http://stable.melpa.org/packages/") ; many packages won't show if using stable
    t))
-;; (package-initialize)
 
-;; (unless (package-installed-p 'use-package)
-;;   (package-refresh-contents)
-;;   (package-install 'use-package))
 
+(dolist (package '(use-package))
+   (unless (package-installed-p package)
+     (package-install package)))
+(package-initialize)
 (eval-when-compile
   (require 'use-package))
 (use-package flycheck :ensure t)
 (use-package gruvbox-theme :ensure t)
 (use-package xterm-color :ensure t)
-(use-package jedi :ensure t)
+;; (use-package jedi :ensure t)
 (use-package smart-mode-line :ensure t)
-(use-package sphinx-doc :ensure t)
-(use-package elpy :ensure t)
 (use-package projectile :ensure t)
+(use-package numpydoc :ensure t)
+;; (use-package elpy :ensure t)
+;; (setq elpy-rpc-virtualenv-path 'current)
+(use-package projectile :ensure t)
+(use-package company :ensure t)
+(global-company-mode)
 (use-package helm :ensure t)
+(use-package highlight-indentation :ensure t)
 (use-package diff-hl :ensure t)
-(use-package blacken :ensure t)
+;; (use-package blacken :ensure t)
+(use-package eglot
+  :ensure t
+  :defer t
+  :hook (python-mode . eglot-ensure))
 
-(add-hook 'python-mode-hook 'jedi:setup)
-(setq jedi:complete-on-dot t)
+(add-hook `python-mode-hook `eglot-ensure)
 
-(elpy-enable)
-(add-hook 'python-mode-hook 'blacken-mode)
+;; (add-hook 'python-mode-hook 'jedi:setup)
+;; (setq jedi:complete-on-dot t)
+
+;; (elpy-enable)
+;; (add-hook 'python-mode-hook 'blacken-mode)
+;; (setq blacken-line-length 120)
 
 ;; ;; Hook for blacken
 ;; (add-hook 'python-mode-hook 'python-black-on-save-mode)
@@ -72,7 +84,8 @@
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
    '("a27c00821ccfd5a78b01e4f35dc056706dd9ede09a8b90c6955ae6a390eb1c1e" "e2fd81495089dc09d14a88f29dfdff7645f213e2c03650ac2dd275de52a513de" "a622aaf6377fe1cd14e4298497b7b2cae2efc9e0ce362dade3a58c16c89e089c" "2a9039b093df61e4517302f40ebaf2d3e95215cb2f9684c8c1a446659ee226b9" default))
- '(package-selected-packages '(org-bullets blacken use-package gruvbox-theme)))
+ '(package-selected-packages
+   '(highlight-indentation company eglot numpydoc markdown-mode org-bullets use-package gruvbox-theme)))
  ;; '(flycheck-python-flake8-executable "flake8")
  ;; '(flycheck-python-mypy-executable "mypy")
  ;; '(flycheck-python-pycompile-executable "python")
@@ -174,7 +187,7 @@ collapsed buffer"
 (menu-bar-mode -99)
 ;; (tool-bar-mode -1)
 ;; (scroll-bar-mode -1)
-(add-to-list 'auto-mode-alist '("\\.m\\'" . octave-mode))
+;; (add-to-list 'auto-mode-alist '("\\.m\\'" . octave-mode))
 (set-default 'truncate-lines t)
 (setq-default fill-column 119)
 
@@ -275,7 +288,7 @@ collapsed buffer"
 ;;; Stefan Monnier <foo at acm.org>. It is the opposite of fill-paragraph
 (defun unfill-paragraph (&optional region)
   "Takes a multi-line paragraph and makes it into a single line of text."
-  (interactive (progn (barf-if-buffer-read-only) '(t)))
+p  (interactive (progn (barf-if-buffer-read-only) '(t)))
   (let ((fill-column (point-max))
 	;; This would override `fill-column' if it's an integer.
 	(emacs-lisp-docstring-fill-column t))
@@ -324,6 +337,17 @@ collapsed buffer"
 ;;              '("^\\*shell\\*$" . (display-buffer-same-window)))
 
 ;; add easy todo line
+
+(defun light-mode()
+  "Set gruv box theme to light mode."
+  (interactive)
+  (load-theme 'gruvbox-light-hard t))
+
+(defun dark-mode()
+  "Set gruv box theme to dark mode."
+  (interactive)
+  (load-theme 'gruvbox-dark-hard t))
+
 (defun td ()
     "Writes out a todo line with the current date."
     (interactive)
@@ -384,4 +408,4 @@ collapsed buffer"
 (provide `init)
 (put 'upcase-region 'disabled nil)
 
- (tool-bar-mode -1)
+(tool-bar-mode -1)
