@@ -9,4 +9,4 @@ git config --global alias.llll "!git log --pretty=format:'%C(auto)%h%d (%cr) [%a
 git config --global alias.sl "!git status && git ll 10 && echo \"\""
 git config --global alias.ds "!git diff --staged"
 git config --global init.defaultBranch main
-git config filter.strip-notebook-output.clean 'jupyter nbconvert --ClearOutputPreprocessor.enabled=True --to=notebook --stdin --stdout --log-level=ERROR'
+git config filter.strip-notebook-output.clean 'jupyter nbconvert --ClearOutputPreprocessor.enabled=True --ClearMetadataPreprocessor.enabled=True --to=notebook --stdin --stdout --log-level=ERROR'
