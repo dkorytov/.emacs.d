@@ -2,6 +2,7 @@
 ;; Generic Emacs Setup
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (tool-bar-mode -1)
+(scroll-bar-mode -1)
 (put 'upcase-region 'disabled nil)
 (setq inhibit-startup-message t)
 (menu-bar-mode -99)
