@@ -28,3 +28,6 @@
   :bind ("C-c C-'" . claude-code-ide-menu) ; Set your favorite keybinding
   :config
   (claude-code-ide-emacs-tools-setup))
+
+;; Create an alias for easier invocation
+(defalias 'claude 'claude-code-ide)
