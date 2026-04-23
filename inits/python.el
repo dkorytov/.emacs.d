@@ -1,4 +1,6 @@
- (use-package numpydoc :ensure t)
+(use-package numpydoc :ensure t)
+
+(setq python-indent-def-block-scale 1)
 
 (defun setup-flycheck-python-project-path ()
   (interactive)

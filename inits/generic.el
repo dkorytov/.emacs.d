@@ -96,3 +96,10 @@
 
 (setq bell-volume 0)
 (setq visible-bell 1)
+
+
+;; (add-hook 'after-init-hook (lambda ()
+;;   (when (fboundp 'auto-dim-other-buffers-mode)
+;;     (auto-dim-other-buffers-mode t))))
+
+(global-auto-revert-mode 1)
