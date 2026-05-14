@@ -11,7 +11,7 @@
       '((sequence "TODO" "DOING" "WAITING" "|" "DONE" "|" "DFRD" "CANCELED")))
 
 (setq org-todo-keyword-faces
-      `(("DONE" . org-done) ("DOING" . "orange") ("DFRD" . "#696FCD")))
+      `(("DONE" . org-done) ("DOING" . "orange") ("WAITING" . "purple") ("DFRD" . "#696FCD")))
 
 (setq org-agenda-files (list "~/org/projects"))
 ; log done time
@@ -32,6 +32,44 @@
 (setq org-tag-alist '(("URGENT" . ?u)
                       ("IMPORTANT" . ?i)))
 
+(defun my/org-add-created-date ()
+  "Automatically add a CREATED property to the current heading."
+  (interactive)
+  ;; Only run if we are in an Org buffer, the heading has a TODO state, 
+  ;; and it doesn't already have a CREATED property.
+  (when (and (derived-mode-p 'org-mode)
+             (org-get-todo-state)
+             (not (org-entry-get nil "CREATED")))
+    (org-entry-put nil "CREATED" (format-time-string "[%Y-%m-%d %a %H:%M]"))))
+
+;; Trigger when using Shift+Alt+Enter (M-S-RET) to create a new TODO heading
+(add-hook 'org-insert-todo-heading-hook 'my/org-add-created-date)
+
+;; Trigger when using Shift+Right to cycle a plain heading into a TODO
+(add-hook 'org-after-todo-state-change-hook 'my/org-add-created-date)
+
+
+;; Define a capture template that automatically injects the creation time
+(setq org-capture-templates
+      '(("t" "New TODO (Inbox)" entry 
+         (file "~/org/projects/inbox.org") ; Make sure to create this file!
+         "* TODO %?\n  :PROPERTIES:\n  :CREATED: %U\n  :END:\n  %i")))
+
+;; Route all archives into the ~/org/projects/archive/ directory.
+;; The "%s" dynamically inserts the name of the original file.
+;; Example: Archiving from "work.org" sends it to "archive/work.org_archive"
+(setq org-archive-location "~/org/projects/archive/%s_archive::")
+
+;; Dynamically use all agenda files as refile targets
+(setq org-refile-targets
+      '((org-agenda-files :maxlevel . 2) ; Scans every .org file in ~/org/projects
+        (nil :maxlevel . 3)))            ; Allows refiling within the current open fileo
+
+;; 2. Make the prompt show the full path (e.g., "cycling.org/Bikepacking Gear")
+(setq org-refile-use-outline-path 'file)
+
+;; 3. Allow creating new parent headings on the fly during refile
+(setq org-refile-allow-creating-parent-nodes 'confirm)
 
 ;; Install and enable org-super-agenda
 (use-package org-super-agenda
@@ -65,32 +103,33 @@
 
 (setq org-super-agenda-groups
       '(
-	(:name "!! Overdue" ; Name
-                :scheduled past ; Filter criteria
-                :order 2 ; Order it should appear in agenda view
-                :face 'error)
-
 	(:name "⏳ Upcoming Deadlines"
                :deadline future)
                
         (:name "🚀 Scheduled Soon"
                :scheduled future)
+	;; Group 3: Items scheduled for specific times today (meetings, etc.)
+
+	(:name "🔥⏰🔥 Overdue" ; Name
+                :scheduled past ; Filter criteria
+		:deadline past)
 	
+	(:name "🎯 Due Today"
+               :deadline today
+               :scheduled today)
+
 	;; Group 1: The absolute most critical things
-        (:name "🔥 URGENT & CRITICAL"
-               :and (:priority "A" :tag "URGENT"))
-               
+        (:name "🔥 URGENT"
+               :and (:tag "URGENT"))
+
+        ;; Group 7: Important but not P1
+        (:name "⭐ Important"
+               :tag "IMPORTANT")
+
         ;; Group 2: All other P1s that aren't tagged Urgent
         (:name "🚨 High Priority (P1)"
                :priority "A")
                
-        ;; Group 3: Items scheduled for specific times today (meetings, etc.)
-        (:name "📅 Today's Schedule"
-               :time-grid t)
-               
-        ;; Group 4: Important tasks that aren't P1
-        (:name "⭐ Important"
-               :tag "IMPORTANT")
                
         ;; Group 5: The default P2 tasks
         (:name "📝 Standard Tasks (P2)"
@@ -103,4 +142,33 @@
         ;; The Catch-All: Anything that doesn't fit above gets grouped by its file/project name
         (:auto-category t)))
 
+(defun my/sync-secure-mac-calendar ()
+  "Pull local macOS calendar into Org natively without the internet."
+  (interactive)
+  (let ((calendar-file "~/org/projects/calendar.org")
+        
+        ;; The icalBuddy command. 
+        ;; NOTE: If you only want to pull a specific calendar, add: -ic "Work"
+        ;; NOTE: If you are on an older Intel Mac, change the path to /usr/local/bin/icalBuddy
+        (ical-cmd "/opt/homebrew/bin/icalBuddy -b '* ' -nc -iep 'title,datetime' -po 'title,datetime' -df '%Y-%m-%d %a' -tf '%H:%M' -ps '|::::|' eventsToday+14"))
+    
+    (with-temp-file calendar-file
+      (insert "#+TITLE: Secure Local Mac Calendar\n\n")
+      (call-process-shell-command ical-cmd nil t)
+      
+      ;; 1. Convert the custom '::::' separator into an Org active timestamp
+      (goto-char (point-min))
+      (while (search-forward "::::" nil t)
+        (replace-match "\n  <" t t)
+        (end-of-line)
+        (insert ">"))
+      
+      ;; 2. Fix the time ranges (Change "14:00 - 15:00" to "14:00-15:00")
+      (goto-char (point-min))
+      (while (re-search-forward "\\([0-9]\\{2\\}:[0-9]\\{2\\}\\) - \\([0-9]\\{2\\}:[0-9]\\{2\\}\\)" nil t)
+        (replace-match "\\1-\\2" t nil)))
+    
+    (message "Secure local calendar synced!")))
 
+;; Run automatically every 2 hours in the background
+(run-at-time "0 sec" 7200 'my/sync-secure-mac-calendar)
