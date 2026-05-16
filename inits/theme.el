@@ -3,7 +3,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (use-package gruvbox-theme
   :ensure t
-  :config 
+  :config
   (load-theme 'gruvbox-dark-hard t)
 )
 
@@ -50,3 +50,15 @@
 ;;   (selected-window-accent-fringe-thickness 10)
 ;;   (selected-window-accent-custom-color nil)
 ;;   (selected-window-accent-mode-style 'subtle))
+
+;; Use Noto Color Emoji (vector COLRv1) so emoji-bearing lines don't grow
+;; taller than surrounding lines. Install with:
+;;   brew install --cask font-noto-color-emoji
+(when (display-graphic-p)
+  (set-fontset-font t 'emoji
+                    (font-spec :family "Noto Color Emoji")
+                    nil 'prepend)
+  (set-fontset-font t 'symbol
+                    (font-spec :family "Noto Color Emoji")
+                    nil 'append)
+  (setq use-default-font-for-symbols nil))

@@ -78,6 +78,18 @@
   ;; This turns it on globally for all your agenda views
   (org-super-agenda-mode t))
 
+(defun my/org-agenda-tag-markers ()
+  "Return 🔥/⭐ markers based on URGENT/IMPORTANT tags on the current agenda entry.
+🔥⭐ if both, 🔥 if only URGENT, ⭐ if only IMPORTANT, blanks otherwise (for alignment)."
+  (let* ((tags (org-get-tags))
+         (urgent    (and tags (member "URGENT" tags)))
+         (important (and tags (member "IMPORTANT" tags))))
+    (cond
+     ((and urgent important) "🔥⭐")
+     (urgent                 "🔥  ")
+     (important              "⭐  ")
+     (t                      "    "))))
+
 (defun my/org-agenda-relative-date ()
   "Calculate relative days for deadline or scheduled items in non-agenda views."
   (let* ((dl (org-entry-get nil "DEADLINE"))
@@ -96,27 +108,31 @@
       "                ")))
 
 (setq org-agenda-prefix-format
-      '((agenda . " %i %-22:c%?-12t% s %(make-string (* 2 (org-outline-level)) 32)")
-        (todo   . " %i %-22:c %(my/org-agenda-relative-date) %(make-string (* 2 (org-outline-level)) 32)")
-        (tags   . " %i %-22:c %(my/org-agenda-relative-date) %(make-string (* 2 (org-outline-level)) 32)")
-        (search . " %i %-22:c")))
+      '((agenda . " %i %-30:c%?-12t% s %(my/org-agenda-tag-markers) %(make-string (* 2 (org-outline-level)) 32)")
+        (todo   . " %i %-30:c %(my/org-agenda-relative-date) %(my/org-agenda-tag-markers) %(make-string (* 2 (org-outline-level)) 32)")
+        (tags   . " %i %-30:c %(my/org-agenda-relative-date) %(my/org-agenda-tag-markers) %(make-string (* 2 (org-outline-level)) 32)")
+        (search . " %i %-30:c")))
 
 (setq org-super-agenda-groups
       '(
 	(:name "⏳ Upcoming Deadlines"
                :deadline future)
-               
+
         (:name "🚀 Scheduled Soon"
                :scheduled future)
 	;; Group 3: Items scheduled for specific times today (meetings, etc.)
 
-	(:name "🔥⏰🔥 Overdue" ; Name
+	(:name "‼️⏰‼️ Overdue" ; Name
                 :scheduled past ; Filter criteria
 		:deadline past)
-	
+
 	(:name "🎯 Due Today"
                :deadline today
                :scheduled today)
+
+        ;; Group 0: Both tags — the Eisenhower "do it now" quadrant
+        (:name "🔥⭐ Important & Urgent"
+               :and (:tag "URGENT" :tag "IMPORTANT"))
 
 	;; Group 1: The absolute most critical things
         (:name "🔥 URGENT"
