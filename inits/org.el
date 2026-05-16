@@ -158,6 +158,46 @@
         ;; The Catch-All: Anything that doesn't fit above gets grouped by its file/project name
         (:auto-category t)))
 
+(defun my/org-agenda-cmp-closed (a b)
+  "Compare two agenda entries A and B by their CLOSED timestamp."
+  (let* ((closed-seconds
+          (lambda (entry)
+            (let ((m (get-text-property 0 'org-marker entry)))
+              (and m (org-with-point-at m
+                       (when-let ((c (org-entry-get nil "CLOSED")))
+                         (org-time-string-to-seconds c)))))))
+         (ta (funcall closed-seconds a))
+         (tb (funcall closed-seconds b)))
+    (cond ((and ta tb) (cond ((> ta tb) 1) ((< ta tb) -1) (t nil)))
+          (ta 1)
+          (tb -1)
+          (t nil))))
+
+(defun my/org-agenda-closed-date ()
+  "Return a relative CLOSED date marker for the current agenda entry."
+  (let ((c (org-entry-get nil "CLOSED")))
+    (if c
+        (let ((days (- (org-time-string-to-absolute (format-time-string "%Y-%m-%d"))
+                       (org-time-string-to-absolute c))))
+          (cond
+           ((= days 0) (format "%-16s" "[Today]"))
+           ((= days 1) (format "%-16s" "[Yesterday]"))
+           (t          (format "%-16s" (format "[%dd ago]" days)))))
+      "                ")))
+
+(setq org-agenda-custom-commands
+      '(("d" "Recently Closed (last 2 weeks)"
+         ((tags "CLOSED>=\"<-2w>\"/DONE|CANCELED|DFRD"
+                ((org-agenda-overriding-header "✅ Closed in the last 2 weeks")
+                 (org-agenda-cmp-user-defined #'my/org-agenda-cmp-closed)
+                 (org-agenda-sorting-strategy '(user-defined-down))
+                 (org-agenda-prefix-format
+                  '((tags . " %i %-30:c %(my/org-agenda-closed-date) %(my/org-agenda-tag-markers) %(make-string (* 2 (org-outline-level)) 32)")))
+                 (org-super-agenda-groups
+                  '((:name "✅ Done"     :todo "DONE")
+                    (:name "🛑 Canceled" :todo "CANCELED")
+                    (:name "💤 Deferred" :todo "DFRD")))))))))
+
 (defun my/sync-secure-mac-calendar ()
   "Pull local macOS calendar into Org natively without the internet."
   (interactive)
