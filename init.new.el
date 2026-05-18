@@ -1,5 +1,3 @@
-;; force eshell to push .bashrc
-(setq shell-command-switch "-ic")
 ;; Added by Package.el.  This must come before configurations of
 ;; installed packages.  Don't delete this line.  If you don't want it,
 ;; just comment it out by adding a semicolon to the start of the line.
@@ -9,9 +7,19 @@
 (when (>= emacs-major-version 24)
   (require 'package)
 
+  ;; Stable MELPA — only released versions of packages.
   (add-to-list
    'package-archives
-   '("melpa" . "http://stable.melpa.org/packages/") ; many packages won't show if using stable
+   '("melpa-stable" . "https://stable.melpa.org/packages/")
+   t)
+
+  ;; Regular MELPA — bleeding-edge snapshots. Required for packages that don't
+  ;; cut stable releases (e.g. flymake-ruff). When a package exists on both,
+  ;; package.el picks based on `package-archive-priorities' (default: melpa-stable
+  ;; wins because it's listed first in version comparisons).
+  (add-to-list
+   'package-archives
+   '("melpa" . "https://melpa.org/packages/")
    t))
 
 (dolist (package '(use-package))
@@ -25,6 +33,17 @@
 
 (use-package vterm
   :load-path  "/Users/dankorytov/emacs-libvterm")
+
+;; Pull PATH and other env vars from the user's login shell into Emacs.
+;; Without this, GUI Emacs on macOS launches with a barebones environment
+;; (no Homebrew tools, no python venvs, etc.). This runs the shell ONCE at
+;; startup — unlike `shell-command-switch "-ic"' which would re-source it
+;; for every subprocess Emacs spawns.
+(use-package exec-path-from-shell
+  :ensure t
+  :if (memq window-system '(mac ns x))
+  :config
+  (exec-path-from-shell-initialize))
 
 
 

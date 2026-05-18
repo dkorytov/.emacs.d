@@ -1,6 +1,10 @@
 (use-package projectile
   :ensure t
-  )
+  :custom
+  ;; Cache the resolved project root for 10 minutes. Without this, each call
+  ;; to `projectile-project-root' walks `file-truename' chains (32ms profiled
+  ;; per python buffer open). Refresh happens automatically after the timeout.
+  (projectile-project-root-cache-timeout 600))
 
 (use-package yasnippet
   :ensure t
@@ -52,6 +56,14 @@
               ("C-c r" . eglot-rename)
               ("C-c a" . eglot-code-actions))
   :config
+  ;; Force pyright as the python LSP server. Without this, eglot picks the
+  ;; first server on PATH from `eglot-server-programs' — sometimes pylsp,
+  ;; jedi-language-server, or ruff-lsp depending on what's installed.
+  ;; pyright gives the best type-aware navigation/completion.
+  (add-to-list 'eglot-server-programs
+               '((python-mode python-ts-mode python-base-mode)
+                 . ("pyright-langserver" "--stdio")))
+
   ;; Match the previous lsp-mode bindings — eglot installs an xref backend, so
   ;; these xref commands route through the LSP server when eglot is active.
   (define-key global-map (kbd "M-[") 'xref-find-definitions)
