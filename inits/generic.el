@@ -103,3 +103,6 @@
 ;;     (auto-dim-other-buffers-mode t))))
 
 (global-auto-revert-mode 1)
+
+(setq ispell-program-name "aspell")
+(setq ispell-extra-args '("--sug-mode=normal" "--lang=en_US"))
