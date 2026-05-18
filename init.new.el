@@ -45,25 +45,11 @@
  ;; If there is more than one, they won't work right.
  '(eshell-prompt ((((class color) (background dark)) (:foreground "red" :weight bold)))))
 
-(defun set-the-fucking-linter ()
-  (interactive)
-    (setq flycheck-checker 'python-pylint))
-
-(add-hook 'python-mode-hook 'set-the-fucking-linter)
-
 (load-file "~/.emacs.d/inits/generic.el")
 (load-file "~/.emacs.d/inits/theme.el")
 (load-file "~/.emacs.d/inits/autosave.el")
 (load-file "~/.emacs.d/inits/org.el")
+(load-file "~/.emacs.d/inits/treesit.el")
 (load-file "~/.emacs.d/inits/prog.el")
 (load-file "~/.emacs.d/inits/python.el")
 (load-file "~/.emacs.d/inits/claude.el")
-
-(add-hook 'python-mode-hook #'(lambda () (setq flycheck-checker 'python-pylint)))
-
-(defun set-the-fucking-linter2 ()
-  (interactive)
-    (setq flycheck-checker 'python-pylint))
-
-(add-hook 'python-mode-hook 'set-the-fucking-linter2)
-(flycheck-add-next-checker 'python-pylint 'python-pyright)

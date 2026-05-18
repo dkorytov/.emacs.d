@@ -36,43 +36,32 @@
   :config
   (add-to-list 'auto-mode-alist '("\\.yml\\'" . yaml-mode)))
 
-(use-package lsp-mode
-  :ensure t
-  :hook
-  (python-mode . lsp)
-  :commands lsp
+;; eglot — built-in LSP client (Emacs 29+). No `:ensure' since it ships with
+;; Emacs. eglot wires into the standard Emacs facilities: xref for navigation,
+;; flymake for diagnostics, eldoc for hover, completion-at-point (which
+;; company picks up) for completion.
+;;
+;; LSP server selection is automatic via `eglot-server-programs' — eglot will
+;; find pyright/basedpyright/pylsp on PATH for python-base-mode buffers.
+;;
+;; The previous lsp-mode config is preserved (but not loaded) in
+;; `inits/lsp-mode.el' for easy switch-back.
+(use-package eglot
+  :hook (python-base-mode . eglot-ensure)
+  :bind (:map eglot-mode-map
+              ("C-c r" . eglot-rename)
+              ("C-c a" . eglot-code-actions))
   :config
-  (define-key global-map (kbd "M-[") 'lsp-find-definition)
-  (define-key global-map (kbd "M-]") 'lsp-find-reference)
-  )
+  ;; Match the previous lsp-mode bindings — eglot installs an xref backend, so
+  ;; these xref commands route through the LSP server when eglot is active.
+  (define-key global-map (kbd "M-[") 'xref-find-definitions)
+  (define-key global-map (kbd "M-]") 'xref-find-references)
+  (define-key global-map (kbd "M-/") 'xref-find-references))
 
-(use-package lsp-ui
-  :ensure t
-  :config
-  (define-key lsp-ui-mode-map [remap xref-find-definitions] #'lsp-ui-peek-find-definitions)
-  (define-key lsp-ui-mode-map [remap xref-find-references] #'lsp-ui-peek-find-references)
-  (define-key global-map (kbd "M-/") 'xref-find-references)
-  (setq lsp-ui-peek-always-show t)
-  (setq lsp-ui-doc-show-with-cursor t)
-  (setq lsp-ui-doc-delay 0.2)
-  )
-
-(use-package flycheck
-  :ensure t
-  :config
-  (define-key global-map (kbd "C->") 'flycheck-next-error)
-  (define-key global-map (kbd "C-<") 'flycheck-previous-error)
-  (setq flycheck-check-syntax-automatically '(mode-enabled save))
-  )
+;; flymake (built-in) — eglot's diagnostic surface. Match the previous
+;; flycheck bindings for muscle-memory continuity.
+(define-key global-map (kbd "C->") 'flymake-goto-next-error)
+(define-key global-map (kbd "C-<") 'flymake-goto-prev-error)
 
 (add-hook 'prog-mode-hook 'hs-minor-mode)
 (add-hook 'prog-mode-hook 'display-line-numbers-mode)
-
-
-(add-to-list 'display-buffer-alist
-             `(,(rx bos "*Flycheck errors*" eos)
-              (display-buffer-reuse-window
-               display-buffer-in-side-window)
-              (side            . right)
-              (reusable-frames . visible)
-              ))
