@@ -71,4 +71,5 @@
 (load-file "~/.emacs.d/inits/treesit.el")
 (load-file "~/.emacs.d/inits/prog.el")
 (load-file "~/.emacs.d/inits/python.el")
+(load-file "~/.emacs.d/inits/markdown.el")
 (load-file "~/.emacs.d/inits/claude.el")

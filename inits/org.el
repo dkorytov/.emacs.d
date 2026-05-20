@@ -1,11 +1,14 @@
 (require 'org)
 
 (use-package org-bullets
-    :ensure t
-    :init
-    (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
+  :ensure t
+  :init
+  (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
 
-(setq org-startup-indented t) 
+(setq org-startup-indented t)
+(setq org-startup-folded 'content)
+
+(add-hook 'org-mode-hook #'org-fold-hide-drawer-all)
 
 (setq org-todo-keywords
       '((sequence "TODO" "DOING" "WAITING" "|" "DONE" "|" "DFRD" "CANCELED")))
@@ -14,15 +17,18 @@
       `(("DONE" . org-done) ("DOING" . "orange") ("WAITING" . "purple") ("DFRD" . "#696FCD")))
 
 (setq org-agenda-files (list "~/org/projects"))
-; log done time
+					; log done time
 (setq org-log-done 'time)
 
-; Can't finish a task until all sub-tasks are done
+					; Can't finish a task until all sub-tasks are done
 (setq org-enforce-todo-dependencies t)
 
 (global-set-key (kbd "C-c l") 'org-store-link)
 (global-set-key (kbd "C-c a") 'org-agenda)
 (global-set-key (kbd "C-c c") 'org-capture)
+
+(setq org-agenda-window-setup 'current-window
+      org-agenda-restore-windows-after-quit t)
 
 (setq org-priority-faces
       '((?A . (:foreground "red" :weight bold))
@@ -30,7 +36,8 @@
         (?C . (:foreground "yellow"))))
 
 (setq org-tag-alist '(("URGENT" . ?u)
-                      ("IMPORTANT" . ?i)))
+                      ("IMPORTANT" . ?i)
+		      ("LIGHT" . ?l)))
 
 (defun my/org-add-created-date ()
   "Automatically add a CREATED property to the current heading."
@@ -78,17 +85,21 @@
   ;; This turns it on globally for all your agenda views
   (org-super-agenda-mode t))
 
+(defvar my/org-agenda-tag-marker-alist
+  '(("URGENT"    . "🔥")
+    ("IMPORTANT" . "⭐")
+    ("LIGHT"     . "🪶"))
+  "Org tag -> emoji marker shown in agenda views.
+Order here determines column order; missing tags render as two spaces.")
+
 (defun my/org-agenda-tag-markers ()
-  "Return 🔥/⭐ markers based on URGENT/IMPORTANT tags on the current agenda entry.
-🔥⭐ if both, 🔥 if only URGENT, ⭐ if only IMPORTANT, blanks otherwise (for alignment)."
-  (let* ((tags (org-get-tags))
-         (urgent    (and tags (member "URGENT" tags)))
-         (important (and tags (member "IMPORTANT" tags))))
-    (cond
-     ((and urgent important) "🔥⭐")
-     (urgent                 "🔥  ")
-     (important              "⭐  ")
-     (t                      "    "))))
+  "Return concatenated emoji markers for the current entry's tags.
+Each entry in `my/org-agenda-tag-marker-alist' produces its emoji if the
+tag is present, otherwise two spaces — keeping agenda columns aligned."
+  (let ((tags (org-get-tags)))
+    (mapconcat (lambda (pair) (if (member (car pair) tags) (cdr pair) "  "))
+               my/org-agenda-tag-marker-alist
+               "")))
 
 (defun my/org-agenda-relative-date ()
   "Calculate relative days for deadline or scheduled items in non-agenda views."
@@ -113,6 +124,31 @@
         (tags   . " %i %-30:c %(my/org-agenda-relative-date) %(my/org-agenda-tag-markers) %(make-string (* 2 (org-outline-level)) 32)")
         (search . " %i %-30:c")))
 
+(defun my/org-agenda-cmp-due (a b)
+  "Compare two agenda entries by DEADLINE, falling back to SCHEDULED.
+Earlier dates sort first; items with neither sort last."
+  (let* ((due-seconds
+          (lambda (entry)
+            (let ((m (get-text-property 0 'org-marker entry)))
+              (and m (org-with-point-at m
+                       (when-let ((d (or (org-entry-get nil "DEADLINE")
+                                         (org-entry-get nil "SCHEDULED"))))
+                         (org-time-string-to-seconds d)))))))
+         (ta (funcall due-seconds a))
+         (tb (funcall due-seconds b)))
+    (cond ((and ta tb) (cond ((< ta tb) -1) ((> ta tb) 1) (t nil)))
+          (ta -1)
+          (tb 1)
+          (t nil))))
+
+(setq org-agenda-cmp-user-defined #'my/org-agenda-cmp-due)
+
+(setq org-agenda-sorting-strategy
+      '((agenda habit-down time-up priority-down category-keep)
+        (todo user-defined-up priority-down category-keep)
+        (tags user-defined-up priority-down category-keep)
+        (search category-keep)))
+
 (setq org-super-agenda-groups
       '(
 	(:name "⏳ Upcoming Deadlines"
@@ -123,8 +159,8 @@
 	;; Group 3: Items scheduled for specific times today (meetings, etc.)
 
 	(:name "‼️⏰‼️ Overdue" ; Name
-                :scheduled past ; Filter criteria
-		:deadline past)
+               :scheduled past ; Filter criteria
+	       :deadline past)
 
 	(:name "🎯 Due Today"
                :deadline today
