@@ -37,7 +37,8 @@
 
 (setq org-tag-alist '(("URGENT" . ?u)
                       ("IMPORTANT" . ?i)
-		      ("LIGHT" . ?l)))
+		      ("LIGHT" . ?l)
+		      ("FOLLOWUP" . ?f)))
 
 (defun my/org-add-created-date ()
   "Automatically add a CREATED property to the current heading."
@@ -54,6 +55,22 @@
 
 ;; Trigger when using Shift+Right to cycle a plain heading into a TODO
 (add-hook 'org-after-todo-state-change-hook 'my/org-add-created-date)
+
+(defun my/org-followup-to-waiting ()
+  "When FOLLOWUP is added, require a SCHEDULED date and move active TODOs to WAITING.
+If the user cancels the schedule prompt, the FOLLOWUP tag is removed."
+  (when (and (derived-mode-p 'org-mode)
+             (member "FOLLOWUP" (org-get-tags nil t)))
+    (unless (org-entry-get nil "SCHEDULED")
+      (condition-case nil
+          (org-schedule nil)
+        (quit
+         (org-toggle-tag "FOLLOWUP" 'off)
+         (user-error "FOLLOWUP requires a SCHEDULED date — tag removed"))))
+    (when (member (org-get-todo-state) '("TODO" "DOING"))
+      (org-todo "WAITING"))))
+
+(add-hook 'org-after-tags-change-hook #'my/org-followup-to-waiting)
 
 
 ;; Define a capture template that automatically injects the creation time
@@ -151,6 +168,9 @@ Earlier dates sort first; items with neither sort last."
 
 (setq org-super-agenda-groups
       '(
+	(:name "🪃 Follow Ups"
+               :tag "FOLLOWUP")
+
 	(:name "⏳ Upcoming Deadlines"
                :deadline future)
 
