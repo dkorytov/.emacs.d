@@ -271,6 +271,13 @@ Earlier dates sort first; items with neither sort last."
   "Look up KEY in the current `my/org-context'."
   (alist-get key (alist-get my/org-context my/org-context-settings)))
 
+(defun my/org-refresh-agendas ()
+  "Refresh every open Org agenda buffer in place."
+  (dolist (buf (buffer-list))
+    (with-current-buffer buf
+      (when (derived-mode-p 'org-agenda-mode)
+        (org-agenda-redo t)))))
+
 (defun my/org-apply-context ()
   "Apply settings for the current `my/org-context'."
   (setq org-agenda-files     (my/org-context-get 'agenda-files))
@@ -281,7 +288,8 @@ Earlier dates sort first; items with neither sort last."
            "* TODO %?\n  :PROPERTIES:\n  :CREATED: %U\n  :END:\n  %i")))
   (set-background-color (or (my/org-context-get 'background)
                             my/org-default-background))
-  (force-mode-line-update t))
+  (force-mode-line-update t)
+  (my/org-refresh-agendas))
 
 (defun my/org-switch-context (name)
   "Switch active org context to NAME (e.g. work or home)."
