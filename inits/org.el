@@ -16,8 +16,7 @@
 (setq org-todo-keyword-faces
       `(("DONE" . org-done) ("DOING" . "orange") ("WAITING" . "purple") ("DFRD" . "#696FCD")))
 
-(setq org-agenda-files (list "~/org/projects"))
-					; log done time
+					; log done time (org-agenda-files set by my/org-apply-context below)
 (setq org-log-done 'time)
 
 					; Can't finish a task until all sub-tasks are done
@@ -73,16 +72,8 @@ If the user cancels the schedule prompt, the FOLLOWUP tag is removed."
 (add-hook 'org-after-tags-change-hook #'my/org-followup-to-waiting)
 
 
-;; Define a capture template that automatically injects the creation time
-(setq org-capture-templates
-      '(("t" "New TODO (Inbox)" entry 
-         (file "~/org/projects/inbox.org") ; Make sure to create this file!
-         "* TODO %?\n  :PROPERTIES:\n  :CREATED: %U\n  :END:\n  %i")))
-
-;; Route all archives into the ~/org/projects/archive/ directory.
-;; The "%s" dynamically inserts the name of the original file.
-;; Example: Archiving from "work.org" sends it to "archive/work.org_archive"
-(setq org-archive-location "~/org/projects/archive/%s_archive::")
+;; Capture templates and archive location are set by `my/org-apply-context'
+;; below so they switch with the active context (work / home).
 
 ;; Dynamically use all agenda files as refile targets
 (setq org-refile-targets
@@ -254,33 +245,63 @@ Earlier dates sort first; items with neither sort last."
                     (:name "🛑 Canceled" :todo "CANCELED")
                     (:name "💤 Deferred" :todo "DFRD")))))))))
 
-(defun my/sync-secure-mac-calendar ()
-  "Pull local macOS calendar into Org natively without the internet."
-  (interactive)
-  (let ((calendar-file "~/org/projects/calendar.org")
-        
-        ;; The icalBuddy command. 
-        ;; NOTE: If you only want to pull a specific calendar, add: -ic "Work"
-        ;; NOTE: If you are on an older Intel Mac, change the path to /usr/local/bin/icalBuddy
-        (ical-cmd "/opt/homebrew/bin/icalBuddy -b '* ' -nc -iep 'title,datetime' -po 'title,datetime' -df '%Y-%m-%d %a' -tf '%H:%M' -ps '|::::|' eventsToday+14"))
-    
-    (with-temp-file calendar-file
-      (insert "#+TITLE: Secure Local Mac Calendar\n\n")
-      (call-process-shell-command ical-cmd nil t)
-      
-      ;; 1. Convert the custom '::::' separator into an Org active timestamp
-      (goto-char (point-min))
-      (while (search-forward "::::" nil t)
-        (replace-match "\n  <" t t)
-        (end-of-line)
-        (insert ">"))
-      
-      ;; 2. Fix the time ranges (Change "14:00 - 15:00" to "14:00-15:00")
-      (goto-char (point-min))
-      (while (re-search-forward "\\([0-9]\\{2\\}:[0-9]\\{2\\}\\) - \\([0-9]\\{2\\}:[0-9]\\{2\\}\\)" nil t)
-        (replace-match "\\1-\\2" t nil)))
-    
-    (message "Secure local calendar synced!")))
+;; ---- Context switching (work / home) ----
 
-;; Run automatically every 2 hours in the background
-(run-at-time "0 sec" 7200 'my/sync-secure-mac-calendar)
+(defvar my/org-context-settings
+  '((work . ((agenda-files       . ("~/org/projects"))
+             (inbox-file         . "~/org/projects/inbox.org")
+             (archive-location   . "~/org/projects/archive/%s_archive::")
+             (background         . nil)
+             (label              . "WORK")))
+    (home . ((agenda-files       . ("~/org_home"))
+             (inbox-file         . "~/org_home/inbox.org")
+             (archive-location   . "~/org_home/archive/%s_archive::")
+             (background         . "#2a2520")
+             (label              . "HOME"))))
+  "Per-context org settings applied by `my/org-apply-context'.")
+
+(defvar my/org-context 'work
+  "Currently active org context.")
+
+(defvar my/org-default-background
+  (frame-parameter nil 'background-color)
+  "Frame background captured before any context tint is applied.")
+
+(defun my/org-context-get (key)
+  "Look up KEY in the current `my/org-context'."
+  (alist-get key (alist-get my/org-context my/org-context-settings)))
+
+(defun my/org-apply-context ()
+  "Apply settings for the current `my/org-context'."
+  (setq org-agenda-files     (my/org-context-get 'agenda-files))
+  (setq org-archive-location (my/org-context-get 'archive-location))
+  (setq org-capture-templates
+        `(("t" "New TODO (Inbox)" entry
+           (file ,(my/org-context-get 'inbox-file))
+           "* TODO %?\n  :PROPERTIES:\n  :CREATED: %U\n  :END:\n  %i")))
+  (set-background-color (or (my/org-context-get 'background)
+                            my/org-default-background))
+  (force-mode-line-update t))
+
+(defun my/org-switch-context (name)
+  "Switch active org context to NAME (e.g. work or home)."
+  (interactive
+   (list (intern (completing-read "Context: "
+                                  (mapcar (lambda (c) (symbol-name (car c)))
+                                          my/org-context-settings)
+                                  nil t))))
+  (setq my/org-context name)
+  (my/org-apply-context)
+  (message "Org context: %s" name))
+
+(global-set-key (kbd "C-c o c") #'my/org-switch-context)
+
+(defvar my/org-context-mode-line
+  '(:eval (format " [%s]" (my/org-context-get 'label)))
+  "Mode line construct showing the active org context.")
+
+(unless (member my/org-context-mode-line global-mode-string)
+  (setq global-mode-string
+        (append (or global-mode-string '("")) (list my/org-context-mode-line))))
+
+(my/org-apply-context)
