@@ -55,9 +55,28 @@
 ;; Trigger when using Shift+Right to cycle a plain heading into a TODO
 (add-hook 'org-after-todo-state-change-hook 'my/org-add-created-date)
 
+(defun my/org-sync-followup-state-at-point ()
+  "Sync FOLLOWUP state for the entry at point based on its SCHEDULED date.
+- WAITING + scheduled today/past → TODO (now actionable)
+- TODO/DOING + scheduled future → WAITING (deferred again)"
+  (when (and (derived-mode-p 'org-mode)
+             (member "FOLLOWUP" (org-get-tags nil t)))
+    (let* ((today (org-time-string-to-absolute (format-time-string "%Y-%m-%d")))
+           (state (org-get-todo-state))
+           (sched (org-entry-get nil "SCHEDULED"))
+           (sched-day (and sched (org-time-string-to-absolute sched))))
+      (cond
+       ((and sched-day (<= sched-day today)
+             (equal state "WAITING"))
+        (org-todo "TODO"))
+       ((and sched-day (> sched-day today)
+             (member state '("TODO" "DOING")))
+        (org-todo "WAITING"))))))
+
 (defun my/org-followup-to-waiting ()
-  "When FOLLOWUP is added, require a SCHEDULED date and move active TODOs to WAITING.
-If the user cancels the schedule prompt, the FOLLOWUP tag is removed."
+  "When FOLLOWUP is added: require a SCHEDULED date, add the LIGHT tag, and
+sync state based on the schedule. If the user cancels the schedule prompt,
+the FOLLOWUP tag is removed."
   (when (and (derived-mode-p 'org-mode)
              (member "FOLLOWUP" (org-get-tags nil t)))
     (unless (org-entry-get nil "SCHEDULED")
@@ -66,10 +85,22 @@ If the user cancels the schedule prompt, the FOLLOWUP tag is removed."
         (quit
          (org-toggle-tag "FOLLOWUP" 'off)
          (user-error "FOLLOWUP requires a SCHEDULED date — tag removed"))))
-    (when (member (org-get-todo-state) '("TODO" "DOING"))
-      (org-todo "WAITING"))))
+    (unless (member "LIGHT" (org-get-tags nil t))
+      (org-toggle-tag "LIGHT" 'on))
+    (my/org-sync-followup-state-at-point)))
 
 (add-hook 'org-after-tags-change-hook #'my/org-followup-to-waiting)
+
+(defun my/org-sync-followup-state ()
+  "Run `my/org-sync-followup-state-at-point' over every file in `org-agenda-files'."
+  (interactive)
+  (org-map-entries #'my/org-sync-followup-state-at-point nil 'agenda))
+
+(advice-add 'org-agenda :before
+            (lambda (&rest _) (my/org-sync-followup-state)))
+
+(advice-add 'org-schedule :after
+            (lambda (&rest _) (my/org-sync-followup-state-at-point)))
 
 
 ;; Capture templates and archive location are set by `my/org-apply-context'
@@ -159,8 +190,8 @@ Earlier dates sort first; items with neither sort last."
 
 (setq org-super-agenda-groups
       '(
-	(:name "🪃 Follow Ups"
-               :tag "FOLLOWUP")
+	(:name "🪃 Upcoming Followups"
+               :and (:tag "FOLLOWUP" :scheduled future))
 
 	(:name "⏳ Upcoming Deadlines"
                :deadline future)
@@ -260,8 +291,8 @@ Earlier dates sort first; items with neither sort last."
              (label              . "HOME"))))
   "Per-context org settings applied by `my/org-apply-context'.")
 
-(defvar my/org-context 'work
-  "Currently active org context.")
+(defvar my/org-context (if (eq system-type 'darwin) 'work 'home)
+  "Currently active org context. Defaults to work on macOS, home elsewhere.")
 
 (defvar my/org-default-background
   (frame-parameter nil 'background-color)
@@ -289,6 +320,7 @@ Earlier dates sort first; items with neither sort last."
   (set-background-color (or (my/org-context-get 'background)
                             my/org-default-background))
   (force-mode-line-update t)
+  (my/org-sync-followup-state)
   (my/org-refresh-agendas))
 
 (defun my/org-switch-context (name)
@@ -303,6 +335,16 @@ Earlier dates sort first; items with neither sort last."
   (message "Org context: %s" name))
 
 (global-set-key (kbd "C-c o c") #'my/org-switch-context)
+
+(defun my/org-find-project-file ()
+  "Open one of the current context's org files via `completing-read'."
+  (interactive)
+  (let* ((files (org-agenda-files))
+         (alist (mapcar (lambda (f) (cons (file-name-base f) f)) files))
+         (choice (completing-read "Org file: " alist nil t)))
+    (find-file (cdr (assoc choice alist)))))
+
+(global-set-key (kbd "C-c o f") #'my/org-find-project-file)
 
 (defvar my/org-context-mode-line
   '(:eval (format " [%s]" (my/org-context-get 'label)))
